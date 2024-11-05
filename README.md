@@ -65,6 +65,4 @@ When running the honeypot, you will see output similar to the following:
 
 This honeypot is intended for educational and monitoring purposes. Running a honeypot can attract unwanted attention and should be deployed with caution. Always ensure you are complying with legal and ethical guidelines when using this tool.
 
-## License
 
-This project is licensed under the MIT License.
