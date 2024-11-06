@@ -2,6 +2,7 @@ import os
 import threading
 import socket
 from datetime import datetime
+import logging
 import requests
 from impacket import smbserver
 
@@ -16,6 +17,10 @@ RDP_LOG_FILE = 'rdp_connections_log.txt'
 SMB_LOG_FILE = 'smb_connections_log.txt'
 SSH_LOG_FILE = 'ssh_connections_log.txt'
 IP_LOG_FILE = 'ip_log.txt'  # Unified IP log file for all services
+TELNET_COMMANDS_LOG_FILE = 'telnet_commands_log.txt'
+
+# Set logging level for requests to avoid debug logs
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 def display_banner():
     """Display a banner in the terminal on startup."""
@@ -102,9 +107,50 @@ def start_ssh_honeypot():
             client_socket.close()
 
 def start_telnet_honeypot():
-    """Start a basic Telnet honeypot."""
+    """Start a basic Telnet honeypot that logs commands."""
     log_event("Starting Telnet honeypot...")
-    start_honeypot(port=23, welcome_message="Welcome to Telnet\n", protocol="Telnet")
+    
+    # Set up a Telnet-specific honeypot server
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind((HOST, 23))
+    server_socket.listen(1)
+    
+    log_event('Telnet honeypot is running on port 23...')
+
+    while True:
+        client_socket, client_address = server_socket.accept()
+        log_event(f'Telnet connection from: {client_address[0]}:{client_address[1]}')
+        log_ip(client_address[0], "Telnet")  # Log IP for Telnet with country
+        log_to_file(TELNET_COMMANDS_LOG_FILE, f'Connection from {client_address[0]}:{client_address[1]}')
+
+        try:
+            client_socket.sendall("Welcome to Telnet\n".encode('utf-8'))
+
+            while True:
+                # Receive data from the client
+                data = client_socket.recv(BUFFER_SIZE)
+                if not data:
+                    break
+
+                # Try decoding data as UTF-8, log as hex if decoding fails
+                try:
+                    decoded_data = data.decode('utf-8').strip()
+                    log_event(f'Telnet command from {client_address[0]}: {decoded_data}')
+                    log_to_file(TELNET_COMMANDS_LOG_FILE, f'Command from {client_address[0]}: {decoded_data}')
+                except UnicodeDecodeError:
+                    hex_data = data.hex()
+                    log_event(f'Telnet raw data from {client_address[0]}: {hex_data}')
+                    log_to_file(TELNET_COMMANDS_LOG_FILE, f'Raw data from {client_address[0]}: {hex_data}')
+
+                # Send a generic response to each command
+                client_socket.sendall('Command received\n'.encode('utf-8'))
+
+        except Exception as e:
+            log_event(f'Telnet error: {e}')
+            log_to_file(TELNET_COMMANDS_LOG_FILE, f'Error from {client_address[0]}: {e}')
+        finally:
+            client_socket.close()
 
 def start_rdp_honeypot():
     """Start a basic RDP honeypot that logs connection attempts and raw data."""
@@ -145,12 +191,26 @@ def start_smb_honeypot():
     server = smbserver.SimpleSMBServer()
     server.addShare("SHARE", "/tmp", "Honeypot SMB Share")
     
-    # Disable SMB2 support to avoid fallback errors
-    # server.setSMB2Support(True)  # Disabled SMB2 support to avoid issues
+    # Remove automatic logging to avoid unnecessary log creation
+    # server.setLogFile(SMB_LOG_FILE)  # Comment out to avoid immediate log creation
 
-    server.setLogFile(SMB_LOG_FILE)  # Log connections in SMB log
     log_event("SMB honeypot is running on port 445...")
+
+    # Start the SMB server
     server.start()
+
+    # Manually log connections as they happen
+    while True:
+        try:
+            # Wait for an actual connection to log it manually
+            client_socket, client_address = server.accept()
+            log_event(f'SMB connection from: {client_address[0]}:{client_address[1]}')
+            log_ip(client_address[0], "SMB")  # Log IP for SMB with country
+            log_to_file(SMB_LOG_FILE, f'Connection from {client_address[0]}:{client_address[1]}')
+            client_socket.close()
+        except Exception as e:
+            log_event(f'SMB error: {e}')
+            break
 
 def start_honeypot(port, welcome_message, protocol):
     """Generic honeypot function for FTP, SSH, and Telnet."""
