@@ -16,7 +16,7 @@ LabanPot is a simple multi-protocol honeypot designed to monitor and log login a
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/YourUsername/labanpot.git
+   git clone https://github.com/Svenlaban/labanpot.git
    cd LabanPot
    ```
 
