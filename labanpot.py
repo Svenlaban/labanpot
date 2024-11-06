@@ -13,7 +13,7 @@ PASS_FILE = 'passwords.txt'
 def display_banner():
     """Display a graphical banner in the terminal on startup."""
     print("\n" + "="*40)
-    print("          LabanPot v0.2")
+    print("          LabanPot v0.3")
     print("    A Simple Multi-Protocol Honeypot")
     print("="*40 + "\n")
 
@@ -69,6 +69,11 @@ def start_rdp_honeypot():
     """Start a simple RDP honeypot."""
     log_event("Starting RDP honeypot...")
     start_honeypot(port=3389, welcome_message="RDP Server 6.1.7601\n", protocol="RDP")
+
+def start_smb_honeypot():
+    """Start a simple SMB honeypot."""
+    log_event("Starting SMB honeypot...")
+    start_honeypot(port=445, welcome_message="SMB Server\n", protocol="SMB")
 
 def start_honeypot(port, welcome_message, protocol):
     """Generic honeypot function to handle multiple protocols."""
@@ -127,21 +132,35 @@ def start_honeypot(port, welcome_message, protocol):
         finally:
             client_socket.close()
 
+def get_user_selection():
+    """Prompt the user to select which honeypot services to start."""
+    services = {
+        '1': ("FTP", start_ftp_honeypot),
+        '2': ("SSH", start_ssh_honeypot),
+        '3': ("Telnet", start_telnet_honeypot),
+        '4': ("RDP", start_rdp_honeypot),
+        '5': ("SMB", start_smb_honeypot),
+    }
+    
+    print("Select the services to run (e.g., 1,3,5):")
+    for key, (name, _) in services.items():
+        print(f"{key}: {name}")
+
+    choice = input("Enter your choices: ").split(',')
+    selected_services = [services[c.strip()][1] for c in choice if c.strip() in services]
+
+    return selected_services
+
 if __name__ == '__main__':
     display_banner()
+    
+    selected_services = get_user_selection()
+    
+    # Start each selected honeypot in a separate thread
+    threads = [threading.Thread(target=service) for service in selected_services]
 
-    # Start each honeypot in a separate thread
-    threads = [
-        threading.Thread(target=start_ftp_honeypot),
-        threading.Thread(target=start_ssh_honeypot),
-        threading.Thread(target=start_telnet_honeypot),
-        threading.Thread(target=start_rdp_honeypot),
-    ]
-
-    # Start all threads
     for thread in threads:
         thread.start()
 
-    # Wait for all threads to finish
     for thread in threads:
         thread.join()
