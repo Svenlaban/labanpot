@@ -1,14 +1,15 @@
 
-# LabanPot v0.2
+# LabanPot v0.3
 
-LabanPot is a simple multi-protocol honeypot designed to monitor and log login attempts for FTP, SSH, Telnet, and RDP services. It captures usernames and passwords used in attempted logins and displays connection attempts in real-time within the terminal, allowing for easy monitoring of suspicious activity.
+LabanPot is a simple multi-protocol honeypot designed to monitor and log login attempts for FTP, SSH, Telnet, RDP, and SMB services. It captures usernames and passwords used in attempted logins and displays connection attempts in real-time within the terminal, allowing for easy monitoring of suspicious activity.
 
 ## Features
 
 - **Real-time logging** of connection attempts, usernames, and passwords in the terminal.
-- **Multi-protocol support**: Supports FTP, SSH, Telnet, and RDP protocols.
+- **Multi-protocol support**: Supports FTP, SSH, Telnet, RDP, and SMB protocols.
 - **File-based logging** of attempted usernames and passwords, with a counter that tracks how many times each username or password was attempted.
 - **Simulated responses** to mimic real servers, deterring attackers and gathering information on their actions.
+- **Service selection on startup**, allowing you to choose specific protocols to monitor.
 - **Lightweight and simple design**, easy to run in a terminal on a Linux server.
 
 ## Installation
@@ -26,7 +27,8 @@ cd labanpot
    ```bash
    sudo python3 labanpot.py
    ```
-2. **Observe activity** in the terminal. All attempted usernames and passwords will be logged in real-time, and also saved to `usernames.txt` and `passwords.txt` with the count of each attempt.
+2. **Select services to run** at startup. You will be prompted to choose which protocols (FTP, SSH, Telnet, RDP, SMB) you wish to monitor.
+3. **Observe activity** in the terminal. All attempted usernames and passwords will be logged in real-time, and also saved to `usernames.txt` and `passwords.txt` with the count of each attempt.
 
 ## Services
 
@@ -35,6 +37,7 @@ LabanPot currently supports the following protocols:
 - **SSH**: Listens on port 22.
 - **Telnet**: Listens on port 23.
 - **RDP**: Listens on port 3389.
+- **SMB**: Listens on port 445.
 
 Each service responds with messages similar to those of actual servers, which can help deter attackers or collect more information about their intentions.
 
@@ -48,7 +51,7 @@ Each service responds with messages similar to those of actual servers, which ca
 When running the honeypot, you will see output similar to the following:
 ```
 ========================================
-          LabanPot v0.2
+          LabanPot v0.3
     A Simple Multi-Protocol Honeypot
 ========================================
 
@@ -64,5 +67,3 @@ When running the honeypot, you will see output similar to the following:
 ## Security Note
 
 This honeypot is intended for educational and monitoring purposes. Running a honeypot can attract unwanted attention and should be deployed with caution. Always ensure you are complying with legal and ethical guidelines when using this tool.
-
-
