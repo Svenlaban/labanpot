@@ -1,69 +1,66 @@
 
-# LabanPot v0.3
+# LabanPot v0.4
 
-LabanPot is a simple multi-protocol honeypot designed to monitor and log login attempts for FTP, SSH, Telnet, RDP, and SMB services. It captures usernames and passwords used in attempted logins and displays connection attempts in real-time within the terminal, allowing for easy monitoring of suspicious activity.
+LabanPot is a simple multi-protocol honeypot designed to monitor and log login attempts for several services, including FTP, SSH, Telnet, RDP, and SMB. It captures and logs incoming IP addresses along with their country of origin and logs login attempts, raw data, and connection information.
 
 ## Features
 
-- **Real-time logging** of connection attempts, usernames, and passwords in the terminal.
 - **Multi-protocol support**: Supports FTP, SSH, Telnet, RDP, and SMB protocols.
-- **File-based logging** of attempted usernames and passwords, with a counter that tracks how many times each username or password was attempted.
-- **Simulated responses** to mimic real servers, deterring attackers and gathering information on their actions.
-- **Service selection on startup**, allowing you to choose specific protocols to monitor.
-- **Lightweight and simple design**, easy to run in a terminal on a Linux server.
+- **Real-time logging** of connection attempts, usernames, and passwords in the terminal.
+- **Geolocation logging**: Logs IP addresses along with their country of origin using ipinfo.io without an API key.
+- **Unified IP logging**: Stores all IP logs in a single `ip_log.txt` file in the format `IP,Country,Service`.
+- **Separate logs for each service**: Each protocol has its own dedicated log file for detailed tracking.
 
 ## Installation
 
-Clone the repository from GitHub and navigate to the directory:
+1. **Clone the repository**:
 
-```bash
-git clone https://github.com/Svenlaban/labanpot.git
-cd labanpot
-```
+   ```bash
+   git clone https://github.com/YourUsername/LabanPot.git
+   cd LabanPot
+   ```
+
+2. **Install dependencies**:
+
+   Use the `requirements.txt` file to install necessary libraries:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Usage
 
-1. **Run the honeypot** using root privileges (required to bind to standard ports):
-   ```bash
-   sudo python3 labanpot.py
-   ```
-2. **Select services to run** at startup. You will be prompted to choose which protocols (FTP, SSH, Telnet, RDP, SMB) you wish to monitor.
-3. **Observe activity** in the terminal. All attempted usernames and passwords will be logged in real-time, and also saved to `usernames.txt` and `passwords.txt` with the count of each attempt.
+Run the honeypot with root privileges to bind to standard ports:
 
-## Services
+```bash
+sudo python3 labanpot.py
+```
 
-LabanPot currently supports the following protocols:
-- **FTP**: Listens on port 21.
-- **SSH**: Listens on port 22.
-- **Telnet**: Listens on port 23.
-- **RDP**: Listens on port 3389.
-- **SMB**: Listens on port 445.
+Follow the prompts to select which services to activate.
 
-Each service responds with messages similar to those of actual servers, which can help deter attackers or collect more information about their intentions.
+## Logs and Output
 
-## Files Created
-
-- `usernames.txt` - Logs all attempted usernames across all protocols along with the count of each attempt.
-- `passwords.txt` - Logs all attempted passwords across all protocols along with the count of each attempt.
+- **ip_log.txt**: Stores all logged IP addresses along with their country of origin and service (e.g., `192.168.1.1,US,FTP`).
+- **Dedicated logs** for each protocol (e.g., `ssh_connections_log.txt`, `rdp_connections_log.txt`, etc.) store connection and raw data for deeper analysis.
 
 ## Example Output
 
-When running the honeypot, you will see output similar to the following:
+Running the honeypot produces output similar to:
+
 ```
 ========================================
-          LabanPot v0.3
+          LabanPot v0.4
     A Simple Multi-Protocol Honeypot
 ========================================
 
-[2024-11-05 20:43:42] Starting FTP honeypot...
-[2024-11-05 20:43:42] FTP honeypot is running on port 21...
-[2024-11-05 20:43:43] Starting SSH honeypot...
-[2024-11-05 20:43:43] SSH honeypot is running on port 22...
-[2024-11-05 20:43:44] Connection from: 192.168.1.100:51234 on FTP
-[2024-11-05 20:43:45] Attempted login with username: admin on FTP
-[2024-11-05 20:43:46] Attempted login with password: password123 on FTP
+[2024-11-06 14:32:52] Starting FTP honeypot...
+[2024-11-06 14:32:53] FTP honeypot is running on port 21...
+[2024-11-06 14:32:54] SSH connection from: 192.168.1.10:51123
+[2024-11-06 14:32:54] IP logged: 192.168.1.10 from US on SSH
+[2024-11-06 14:32:55] SSH data from 192.168.1.10: SSH-2.0-OpenSSH_7.4
 ```
 
-## Security Note
+## Security Notice
 
-This honeypot is intended for educational and monitoring purposes. Running a honeypot can attract unwanted attention and should be deployed with caution. Always ensure you are complying with legal and ethical guidelines when using this tool.
+This honeypot is for educational and monitoring purposes. Running a honeypot can attract unwanted attention and should be deployed with caution. Ensure compliance with legal and ethical guidelines when using this tool.
+
